@@ -1,1 +1,1 @@
-# Monthly_Dacon_Artwork_Artist_Classification_AI_Contest
+# 2022_Artwork_Artist_Classification_AI_Contest
