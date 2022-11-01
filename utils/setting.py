@@ -23,8 +23,8 @@ class Arguments:
         self.add_argument('--wandb', action='store_true')
 
     def add_hyper_parameters(self):
-        self.add_argument('--method', type=str, default='image', choices=('multimodal', 'image'))
-        self.add_argument('--loss', type=str, default='CrossEntropy', choices=('CrossEntropy', 'LabelSmoothing'))
+        self.add_argument('--method', type=str, default='image', choices=('multimodal', 'image', 'image_step'))
+        self.add_argument('--loss', type=str, default='CrossEntropy', choices=('CrossEntropy', 'WeightedCrossEntropy'))
         self.add_argument('--optimizer', type=str, default='AdamW', choices=('AdamW', 'MADGRAD'))
         self.add_argument('--model_name_or_path', type=str, default='efficientnet_b0')
         self.add_argument('--train_batch_size', type=int, default=32)
@@ -33,7 +33,7 @@ class Arguments:
         self.add_argument('--accumulation_steps', type=int, default=1)
         self.add_argument('--eval_steps', type=int, default=100)
         self.add_argument('--seed', type=int, default=42)
-        self.add_argument('--lr', type=float, default=1e-5)
+        self.add_argument('--lr', type=float, default=2e-4)
         self.add_argument('--weight_decay', type=float, default=0.1)
         self.add_argument('--warmup_ratio', type=float, default=0.05)
         self.add_argument('--patience', type=int, default=5)

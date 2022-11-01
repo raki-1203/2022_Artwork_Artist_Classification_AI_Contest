@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import wandb
 import albumentations as A
+import ttach as tta
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -14,7 +15,7 @@ from sklearn.metrics import f1_score, accuracy_score
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from albumentations.pytorch.transforms import ToTensorV2
 
-from utils.custom_dataset import ImageDataset
+from utils.custom_dataset import ImageQuarterDataset, ImageDataset
 from utils.custom_model import ImageModel
 
 
@@ -25,11 +26,12 @@ class Trainer:
         self.logger = logger
 
         self.train_transform = A.Compose([
-            A.Transpose(p=0.5),
-            A.HorizontalFlip(p=0.5),
-            A.VerticalFlip(p=0.5),
-            A.ShiftScaleRotate(p=0.5),
             A.Resize(args.img_size, args.img_size),
+            A.OneOf([
+                A.Transpose(p=1),
+                A.HorizontalFlip(p=1),
+                A.VerticalFlip(p=1),
+            ], p=0.75),
             A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0,
                         always_apply=False, p=1.0),
             ToTensorV2(),
@@ -63,11 +65,15 @@ class Trainer:
         if is_train:
             train_idx, valid_idx = splits
             train_df = df.iloc[train_idx]
+            train_df = pd.concat([train_df] * 5)
             valid_df = df.iloc[valid_idx]
+            valid_df = pd.concat([valid_df] * 5)
 
             if self.args.method == 'image':
                 train_dataset = ImageDataset(self.args, train_df, self.train_transform)
-                valid_dataset = ImageDataset(self.args, valid_df, self.valid_transform)
+                valid_dataset = ImageQuarterDataset(self.args, valid_df, self.valid_transform)
+            elif self.args.method == 'iamge_step':
+                raise NotImplementedError('args.method 를 잘 선택 해주세요.')
             else:
                 raise NotImplementedError('args.method 를 잘 선택 해주세요.')
             self.train_loader = train_dataset.loader
@@ -96,7 +102,7 @@ class Trainer:
             total_step = epoch * self.step_per_epoch + step
 
             with torch.cuda.amp.autocast(enabled=self.args.use_amp):
-                logits = self.model(batch)
+                logits = self.model(batch['image'])
                 loss = self.supervised_loss(logits, batch['label'])
                 preds = torch.argmax(logits, dim=-1)
 
@@ -151,7 +157,7 @@ class Trainer:
             for step, batch in enumerate(valid_iterator):
                 batch = self.batch_to_device(batch)
 
-                logits = self.model(batch)
+                logits = self.model(batch['image'])
                 loss = self.supervised_loss(logits, batch['label'])
                 preds = torch.argmax(logits, dim=-1)
 
@@ -212,9 +218,22 @@ class Trainer:
         return batch
 
     def predict(self):
+        # transforms = tta.Compose(
+        #     [
+        #         tta.HorizontalFlip(),
+        #         tta.VerticalFlip(),
+        #         # tta.Rotate90(angles=[0, 90]),
+        #         # tta.Scale(scales=[1, 2]),
+        #         # tta.FiveCrops(384, 384),
+        #         # tta.Multiply(factors=[0.7, 1]),
+        #     ]
+        # )
+
         model_state_dict = torch.load(os.path.join(self.args.saved_model_path, 'model_state_dict.pt'),
                                       map_location=self.args.device)
         self.model.load_state_dict(model_state_dict)
+
+        # tta_model = tta.ClassificationTTAWrapper(self.model, transforms, merge_mode='sum').to(self.args.device)
 
         test_iterator = tqdm(self.test_loader, desc='Test Iteration')
 
@@ -224,10 +243,7 @@ class Trainer:
             for step, batch in enumerate(test_iterator):
                 batch = self.batch_to_device(batch)
 
-                if 'cat' in self.args.saved_model_path:
-                    _, _, logits = self.model(batch)
-                else:
-                    logits = self.model(batch)
+                logits = self.model(batch['image'])
                 probs_list.append(logits.detach().cpu().numpy())
                 preds = torch.argmax(logits, dim=-1)
                 preds_list.append(preds.detach().cpu().numpy())
@@ -238,8 +254,12 @@ class Trainer:
         return preds_list, probs_list
 
     def _get_loss(self, weight=None):
-        loss = nn.CrossEntropyLoss(weight=weight)
-
+        if self.args.loss == 'CrossEntropy':
+            loss = nn.CrossEntropyLoss()
+        elif self.args.loss == 'WeightedCrossEntropy':
+            loss = nn.CrossEntropyLoss(weight=weight)
+        else:
+            raise NotImplementedError('args.loss 를 잘 선택 해주세요.')
         return loss
 
     def _get_model(self):
@@ -254,6 +274,7 @@ class Trainer:
             if 'multimodal' in self.args.saved_model_path:
                 raise NotImplementedError('아직 미완성')
             elif 'image' in self.args.saved_model_path:
+                self.args.model_name_or_path = 'resnext50_32x4d'
                 model = ImageModel(self.args)
             else:
                 raise NotImplementedError('좀 더 고민해봐....... 에러처리 더 해야 할 듯')

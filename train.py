@@ -1,24 +1,11 @@
-import os
-
 import numpy as np
-import pandas as pd
 import wandb
 
 from sklearn.model_selection import StratifiedKFold
 
+from utils.data import get_df
 from utils.setting import Setting
 from utils.trainer import Trainer
-
-
-def get_df(args):
-    if args.is_train:
-        df = pd.read_csv(args.path_to_train_data)
-        df['img_path'] = df['img_path'].apply(lambda x: os.path.join(args.image_path, '/'.join(x.split('/')[-2:])))
-        df['artist'] = df['artist'].map(args.label_to_idx)
-    else:
-        df = pd.read_csv(args.path_to_test_data)
-        df['img_path'] = df['img_path'].apply(lambda x: os.path.join(args.image_path, '/'.join(x.split('/')[-2:])))
-    return df
 
 
 if __name__ == '__main__':
@@ -39,9 +26,9 @@ if __name__ == '__main__':
                 break
 
         if args.wandb:
-            name = f'{args.method}_{args.output_path.split("/")[-1]}_FOLD{args.fold}'
+            name = f'{args.output_path.split("/")[-1]}_FOLD{args.fold}'
             wandb_config = {k: v for k, v in vars(args).items() if 'idx' not in k}
-            wandb.init(project='2022 관광데이터 AI 경진대회',
+            wandb.init(project='월간 데이콘 예술 작품 화가 분류 AI 경진대회',
                        name=name,
                        config=wandb_config,
                        reinit=True)

@@ -15,8 +15,8 @@ class ImageModel(nn.Module):
         self.relu = nn.ReLU()
         self.classifier = nn.Linear(self.image_model.num_features, args.num_labels)
 
-    def forward(self, batch):
-        x = self.image_model(batch['image'])
+    def forward(self, x):
+        x = self.image_model(x)
         x = self.linear(self.relu(x))
         x = self.dropout(self.relu(x))
         x = self.classifier(x)

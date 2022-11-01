@@ -5,7 +5,7 @@ import pandas as pd
 
 from glob import glob
 
-from utils.data_preprocessing import get_df
+from utils.data import get_df
 from utils.setting import Setting
 from utils.trainer import Trainer
 
@@ -35,13 +35,13 @@ def main():
     pred_answer = np.argmax(output_probs, axis=-1).tolist()
 
     output_df = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data/sample_submission.csv'))
-    output_df['cat3'] = pred_answer
-    output_df['cat3'] = output_df['cat3'].map(args.idx_to_cat3)
+    output_df['artist'] = pred_answer
+    output_df['artist'] = output_df['artist'].map(args.idx_to_label)
 
     if not os.path.exists(args.predict_path):
         os.makedirs(args.predict_path, exist_ok=True)
 
-    file_save_path = os.path.join(args.predict_path, f'submission_{args.output_path.split("/")[-1]}')
+    file_save_path = os.path.join(args.predict_path, f'submission_{args.predict_path.split("/")[-1]}')
     output_df.to_csv(f'{file_save_path}.csv', index=False)
     logger.info(f'File Save at {file_save_path}')
 
