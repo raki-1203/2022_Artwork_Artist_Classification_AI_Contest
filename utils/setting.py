@@ -26,6 +26,8 @@ class Arguments:
         self.add_argument('--method', type=str, default='image', choices=('multimodal', 'image', 'image_step'))
         self.add_argument('--loss', type=str, default='CrossEntropy', choices=('CrossEntropy', 'WeightedCrossEntropy'))
         self.add_argument('--optimizer', type=str, default='AdamW', choices=('AdamW', 'MADGRAD'))
+        self.add_argument('--scheduler', type=str, default='ReduceLROnPlateau',
+                          choices=('ReduceLROnPlateau', 'get_cosine_schedule_with_warmup'))
         self.add_argument('--model_name_or_path', type=str, default='efficientnet_b0')
         self.add_argument('--train_batch_size', type=int, default=32)
         self.add_argument('--valid_batch_size', type=int, default=128)
@@ -35,10 +37,11 @@ class Arguments:
         self.add_argument('--seed', type=int, default=42)
         self.add_argument('--lr', type=float, default=2e-4)
         self.add_argument('--weight_decay', type=float, default=0.1)
-        self.add_argument('--warmup_ratio', type=float, default=0.05)
+        self.add_argument('--warmup_ratio', type=float, default=0.1)
         self.add_argument('--patience', type=int, default=5)
         self.add_argument('--img_size', type=int, default=384)
         self.add_argument('--num_labels', type=int, default=50)
+        self.add_argument('--tta', action='store_true')
 
     def add_data_parameters(self):
         self.add_argument('--path_to_train_data', type=str, default='./data/train.csv')

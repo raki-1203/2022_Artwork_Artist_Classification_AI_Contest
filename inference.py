@@ -23,6 +23,10 @@ def main():
         model_list = glob(os.path.join(args.output_path, '*'))
     model_list = sorted(model_list)
 
+    if not model_list:
+        logger.info('저장된 모델 없음....종료!')
+        return
+
     output_probs = np.zeros((df.shape[0], args.num_labels))
     for i, model_name in enumerate(model_list, start=1):
         args.saved_model_path = model_name

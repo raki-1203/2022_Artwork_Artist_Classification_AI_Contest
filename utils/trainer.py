@@ -14,6 +14,7 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score, accuracy_score
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from albumentations.pytorch.transforms import ToTensorV2
+from transformers import get_cosine_schedule_with_warmup
 
 from utils.custom_dataset import ImageQuarterDataset, ImageDataset
 from utils.custom_model import ImageModel
@@ -65,9 +66,12 @@ class Trainer:
         if is_train:
             train_idx, valid_idx = splits
             train_df = df.iloc[train_idx]
-            train_df = pd.concat([train_df] * 5)
             valid_df = df.iloc[valid_idx]
-            valid_df = pd.concat([valid_df] * 5)
+            nSamples = sorted(train_df.artist.value_counts())
+            normedWeights = [1 - (x / sum(nSamples)) for x in nSamples]
+            self.class_weights = torch.FloatTensor(normedWeights).to(self.args.device)
+            train_df = pd.concat([train_df] * 3)
+            valid_df = pd.concat([valid_df] * 3)
 
             if self.args.method == 'image':
                 train_dataset = ImageDataset(self.args, train_df, self.train_transform)
@@ -115,26 +119,35 @@ class Trainer:
                     self.scaler.update()
                     self.optimizer.zero_grad()
 
+                if self.args.scheduler == 'get_cosine_schedule_with_warmup':
+                    self.scheduler.step()
+
                 self.train_loss.update(loss.item(), self.args.train_batch_size)
                 self.train_acc.update(acc, self.args.train_batch_size)
 
                 if total_step != 0 and total_step % (self.args.eval_steps * self.args.accumulation_steps) == 0:
                     valid_acc, valid_f1_score, valid_loss = self.validate()
 
-                    self.scheduler.step(valid_acc)
+                    if self.args.scheduler == 'ReduceLROnPlateau':
+                        self.scheduler.step(valid_acc)
 
                     self.model.train()
+                    last_lr = self.scheduler.optimizer.param_groups[0]['lr']
                     if self.args.wandb:
                         wandb.log({
                             'train/loss': self.train_loss.avg,
                             'train/acc': self.train_acc.avg,
+                            'train/learning_rate': last_lr,
                             'eval/loss': valid_loss,
                             'eval/acc': valid_acc,
                             'eval/f1_score': valid_f1_score,
                         })
 
                     self.logger.info(
-                        f'STEP {total_step} | eval loss: {valid_loss:.4f} | eval acc: {valid_acc:.4f} | eval f1_score: {valid_f1_score:.4f} | train loss: {self.train_loss.avg:.4f} | train acc: {self.train_acc.avg:.4f}'
+                        f'STEP {total_step} | eval loss: {valid_loss:.4f} | eval acc: {valid_acc:.4f} | eval f1_score: {valid_f1_score:.4f}'
+                    )
+                    self.logger.info(
+                        f'STEP {total_step} | train loss: {self.train_loss.avg:.4f} | train acc: {self.train_acc.avg:.4f} | lr: {last_lr}'
                     )
 
                     if valid_f1_score > self.best_valid_f1_score:
@@ -190,7 +203,15 @@ class Trainer:
         return optimizer
 
     def _get_scheduler(self):
-        scheduler = ReduceLROnPlateau(self.optimizer, 'max', patience=self.args.patience, factor=0.9)
+        if self.args.scheduler == 'ReduceLROnPlateau':
+            scheduler = ReduceLROnPlateau(self.optimizer, 'max', patience=self.args.patience, factor=0.9)
+        elif self.args.scheduler == 'get_cosine_schedule_with_warmup':
+            total_steps = self.step_per_epoch * self.args.epochs
+            warmup_steps = self.step_per_epoch * self.args.warmup_ratio
+            scheduler = get_cosine_schedule_with_warmup(self.optimizer, num_warmup_steps=warmup_steps,
+                                                        num_training_steps=total_steps)
+        else:
+            raise NotImplementedError('args.scheduler 를 잘 선택 해주세요.')
         return scheduler
 
     def save_model(self, step):
@@ -218,22 +239,22 @@ class Trainer:
         return batch
 
     def predict(self):
-        # transforms = tta.Compose(
-        #     [
-        #         tta.HorizontalFlip(),
-        #         tta.VerticalFlip(),
-        #         # tta.Rotate90(angles=[0, 90]),
-        #         # tta.Scale(scales=[1, 2]),
-        #         # tta.FiveCrops(384, 384),
-        #         # tta.Multiply(factors=[0.7, 1]),
-        #     ]
-        # )
-
         model_state_dict = torch.load(os.path.join(self.args.saved_model_path, 'model_state_dict.pt'),
                                       map_location=self.args.device)
         self.model.load_state_dict(model_state_dict)
 
-        # tta_model = tta.ClassificationTTAWrapper(self.model, transforms, merge_mode='sum').to(self.args.device)
+        if self.args.tta:
+            transforms = tta.Compose(
+                [
+                    tta.HorizontalFlip(),
+                    tta.VerticalFlip(),
+                    tta.Rotate90(angles=[0, 90]),
+                    # tta.Scale(scales=[1, 2]),
+                    # tta.FiveCrops(384, 384),
+                    tta.Multiply(factors=[0.7, 1]),
+                ]
+            )
+            tta_model = tta.ClassificationTTAWrapper(self.model, transforms, merge_mode='sum').to(self.args.device)
 
         test_iterator = tqdm(self.test_loader, desc='Test Iteration')
 
@@ -243,7 +264,10 @@ class Trainer:
             for step, batch in enumerate(test_iterator):
                 batch = self.batch_to_device(batch)
 
-                logits = self.model(batch['image'])
+                if self.args.tta:
+                    logits = self.model(batch['image']) + tta_model(batch['image'])
+                else:
+                    logits = self.model(batch['image'])
                 probs_list.append(logits.detach().cpu().numpy())
                 preds = torch.argmax(logits, dim=-1)
                 preds_list.append(preds.detach().cpu().numpy())
@@ -253,11 +277,11 @@ class Trainer:
 
         return preds_list, probs_list
 
-    def _get_loss(self, weight=None):
+    def _get_loss(self):
         if self.args.loss == 'CrossEntropy':
             loss = nn.CrossEntropyLoss()
         elif self.args.loss == 'WeightedCrossEntropy':
-            loss = nn.CrossEntropyLoss(weight=weight)
+            loss = nn.CrossEntropyLoss(weight=self.class_weights)
         else:
             raise NotImplementedError('args.loss 를 잘 선택 해주세요.')
         return loss

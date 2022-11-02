@@ -1,4 +1,5 @@
 # etc
+.DS_Store
 .idea/
 predict/
 
