@@ -297,8 +297,11 @@ class Trainer:
         else:
             if 'multimodal' in self.args.saved_model_path:
                 raise NotImplementedError('아직 미완성')
-            elif 'image' in self.args.saved_model_path:
+            elif 'resnext50_32x4d' in self.args.saved_model_path:
                 self.args.model_name_or_path = 'resnext50_32x4d'
+                model = ImageModel(self.args)
+            elif 'vit_base_patch16_384' in self.args.saved_model_path:
+                self.args.model_name_or_path = 'vit_base_patch16_384'
                 model = ImageModel(self.args)
             else:
                 raise NotImplementedError('좀 더 고민해봐....... 에러처리 더 해야 할 듯')
