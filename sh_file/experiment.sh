@@ -34,4 +34,4 @@
 
 # Image baseline Train full size & Quarter size image resnext50_32x4d Train Validation Quarter size cutmix 0.5 beta 1 ->
 python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --wandb --model_name_or_path resnext50_32x4d --output_path ./saved_model/image_train_fq_valid_q_cutmix0.5_resnext50_32x4d --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5
-python inference.py --device 1 --output_path_list ./saved_model/image_train_fq_valid_q_cutmix0.5_resnext50_32x4d --predict_path ./predict/image_train_fq_valid_q_cutmix0.5_resnext50_32x4d
+python inference.py --device 1 --output_path_list ./saved_model/image_train_fq_valid_q_cutmix0.5_resnext50_32x4d --predict_path ./predict/image_train_fq_valid_q_cutmix0.5_resnext50_32x4d --tta
