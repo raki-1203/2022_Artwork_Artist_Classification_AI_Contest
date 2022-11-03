@@ -106,8 +106,13 @@ class Trainer:
             total_step = epoch * self.step_per_epoch + step
 
             with torch.cuda.amp.autocast(enabled=self.args.use_amp):
-                logits = self.model(batch['image'])
-                loss = self.supervised_loss(logits, batch['label'])
+                r = np.random.rand(1)  # 0 ~ 1 난수
+                if self.args.beta > 0 and r < self.args.cutmix_prob:
+                    logits, loss = self.cutmix(batch)
+                else:
+                    logits = self.model(batch['image'])
+                    loss = self.supervised_loss(logits, batch['label'])
+
                 preds = torch.argmax(logits, dim=-1)
 
                 self.scaler.scale(loss).backward()
@@ -310,6 +315,41 @@ class Trainer:
                 raise NotImplementedError('좀 더 고민해봐....... 에러처리 더 해야 할 듯')
 
         return model
+
+    def cutmix(self, batch):
+
+        # generate mixed sample
+        lam = np.random.beta(self.args.beta, self.args.beta)
+        rand_index = torch.randperm(batch['image'].size()[0])
+        target_a = batch['label']
+        target_b = batch['label'][rand_index]
+        bbx1, bby1, bbx2, bby2 = self.rand_bbox(batch['image'].size(), lam)
+        batch['image'][:, :, bbx1:bbx2, bby1:bby2] = batch['image'][rand_index, :, bbx1:bbx2, bby1:bby2]
+        # adjust lambda to exactly match pixel ratio
+        lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (batch['image'].size()[-1] * batch['image'].size()[-2]))
+        # compute output
+        logits = self.model(batch['image'])
+        loss = self.supervised_loss(logits, target_a) * lam + self.supervised_loss(logits, target_b) * (1 - lam)
+
+        return logits, loss
+
+    def rand_bbox(self, size, lam):
+        W = size[2]
+        H = size[3]
+        cut_rat = np.sqrt(1 - lam)
+        cut_w = np.int(W * cut_rat)
+        cut_h = np.int(H * cut_rat)
+
+        # uniform
+        cx = np.random.randint(W)
+        cy = np.random.randint(H)
+
+        bbx1 = np.clip(cx - cut_w // 2, 0, W)
+        bby1 = np.clip(cy - cut_h // 2, 0, H)
+        bbx2 = np.clip(cx + cut_w // 2, 0, W)
+        bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+        return bbx1, bby1, bbx2, bby2
 
 
 class AverageMeter(object):
