@@ -25,5 +25,9 @@
 #python inference.py --device 1 --output_path_list ./saved_model/image_train_fq_valid_q_lr5e-5_ReduceLR_vit_base_patch16_384 --predict_path ./predict/image_train_fq_valid_q_lr5e-5_ReduceLR_vit_base_patch16_384 --tta
 
 # Image baseline Train full size & Quarter size image vit_large_patch16_384 Train Validation Quarter size
-python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 2 --accumulation_steps 16 --wandb --lr 5e-5 --model_name_or_path vit_large_patch16_384 --output_path ./saved_model/image_train_fq_valid_q_vit_large_patch16_384 --loss WeightedCrossEntropy
-python inference.py --device 1 --output_path_list ./saved_model/image_train_fq_valid_q_vit_large_patch16_384 --predict_path ./predict/image_train_fq_valid_q_vit_large_patch16_384
+#python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 2 --accumulation_steps 16 --wandb --lr 8e-5 --model_name_or_path vit_large_patch16_384 --output_path ./saved_model/image_train_fq_valid_q_vit_large_patch16_384 --loss WeightedCrossEntropy
+#python inference.py --device 1 --output_path_list ./saved_model/image_train_fq_valid_q_vit_large_patch16_384 --predict_path ./predict/image_train_fq_valid_q_vit_large_patch16_384
+
+# Image baseline Train full size & Quarter size image Resnet50 Train Validation Quarter size
+#python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --wandb --lr 1e-3 --model_name_or_path resnet50 --output_path ./saved_model/image_train_fq_valid_q_resnet50 --loss WeightedCrossEntropy
+python inference.py --device 1 --output_path_list ./saved_model/image_train_fq_valid_q_resnet50 --predict_path ./predict/image_train_fq_valid_q_resnet50 --tta
