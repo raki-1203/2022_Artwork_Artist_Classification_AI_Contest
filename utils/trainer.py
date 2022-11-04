@@ -28,11 +28,9 @@ class Trainer:
 
         self.train_transform = A.Compose([
             A.Resize(args.img_size, args.img_size),
-            A.OneOf([
-                A.Transpose(p=1),
-                A.HorizontalFlip(p=1),
-                A.VerticalFlip(p=1),
-            ], p=0.75),
+            A.Transpose(p=0.5),
+            A.HorizontalFlip(p=0.5),
+            A.VerticalFlip(p=0.5),
             A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0,
                         always_apply=False, p=1.0),
             ToTensorV2(),
