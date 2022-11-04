@@ -25,8 +25,8 @@ class ImageDataset(Dataset):
 
     def random_crop(self, image):
         h, w, c = image.shape
-        new_h = h // 4
-        new_w = w // 4
+        new_h = h // 2
+        new_w = w // 2
         image = A.RandomCrop(new_h, new_w)(image=image)['image']
         return image
 
@@ -93,8 +93,8 @@ class ImageQuarterDataset(Dataset):
 
     def random_crop(self, image):
         h, w, c = image.shape
-        new_h = h // 4
-        new_w = w // 4
+        new_h = h // 2
+        new_w = w // 2
         image = A.RandomCrop(new_h, new_w)(image=image)['image']
         return image
 

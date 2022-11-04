@@ -209,7 +209,7 @@ class Trainer:
 
     def _get_scheduler(self):
         if self.args.scheduler == 'ReduceLROnPlateau':
-            scheduler = ReduceLROnPlateau(self.optimizer, 'max', patience=self.args.patience, factor=0.9)
+            scheduler = ReduceLROnPlateau(self.optimizer, 'max', patience=self.args.patience, factor=0.5)
         elif self.args.scheduler == 'get_cosine_schedule_with_warmup':
             total_steps = self.step_per_epoch * self.args.epochs
             warmup_steps = self.step_per_epoch * self.args.warmup_ratio
