@@ -76,9 +76,9 @@ class ImageQuarterDataset(Dataset):
 
     def __init__(self, args, df, transforms, is_test=False):
         self.df = df
-        # img_path_list = df['img_path'].tolist()
-        # image_list = [cv2.imread(img_path) for img_path in img_path_list]
-        # self.random_crop_image_list = [self.random_crop(image) for image in image_list]
+        img_path_list = df['img_path'].tolist()
+        image_list = [cv2.imread(img_path) for img_path in img_path_list]
+        self.random_crop_image_list = [self.random_crop(image) for image in image_list]
         self.transforms = transforms
         self.is_test = is_test
         self.collate_fn = CollateImageQuarter(is_test)
@@ -100,9 +100,9 @@ class ImageQuarterDataset(Dataset):
 
     def __getitem__(self, idx):
         # Image
-        img_path = self.df['img_path'].iloc[idx]
-        image = cv2.imread(img_path)
-        # image = self.random_crop_image_list[idx]
+        # img_path = self.df['img_path'].iloc[idx]
+        # image = cv2.imread(img_path)
+        image = self.random_crop_image_list[idx]
 
         if self.transforms is not None:
             image = self.transforms(image=image)['image']

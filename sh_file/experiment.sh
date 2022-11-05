@@ -44,6 +44,10 @@
 #python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --wandb --model_name_or_path resnext50_32x4d --output_path ./saved_model/image_baseline_resnext50_32x4d --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_resnext50_32x4d --predict_path ./predict/image_baseline_resnext50_32x4d --tta
 
-# Image baseline + validation dataset 랜덤하게 crop 되도록 계속 변경되도록 만듦 ->
-python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --wandb --model_name_or_path resnext50_32x4d --output_path ./saved_model/image_baseline_validation_randomcrop_resnext50_32x4d --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5
-python inference.py --device 1 --output_path_list ./saved_model/image_baseline_validation_randomcrop_resnext50_32x4d --predict_path ./predict/image_baseline_validation_randomcrop_resnext50_32x4d --tta
+# Image baseline + validation dataset 랜덤하게 crop 되도록 계속 변경되도록 만듦 -> 0.7912232973
+#python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --wandb --model_name_or_path resnext50_32x4d --output_path ./saved_model/image_baseline_validation_randomcrop_resnext50_32x4d --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5
+#python inference.py --device 1 --output_path_list ./saved_model/image_baseline_validation_randomcrop_resnext50_32x4d --predict_path ./predict/image_baseline_validation_randomcrop_resnext50_32x4d --tta
+
+# Image baseline + model efficientnet_b6 -> 0.7912232973
+python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --wandb --model_name_or_path efficientnet_b6 --output_path ./saved_model/image_baseline_efficientnet_b6 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5
+python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b6 --predict_path ./predict/image_baseline_efficientnet_b6 --tta
