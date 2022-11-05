@@ -48,6 +48,6 @@
 #python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --wandb --model_name_or_path resnext50_32x4d --output_path ./saved_model/image_baseline_validation_randomcrop_resnext50_32x4d --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_validation_randomcrop_resnext50_32x4d --predict_path ./predict/image_baseline_validation_randomcrop_resnext50_32x4d --tta
 
-# Image baseline + model efficientnet_b6 -> 0.7912232973
-python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 8 --accumulation_steps 4 --wandb --model_name_or_path efficientnet_b6 --output_path ./saved_model/image_baseline_efficientnet_b6 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --lr 1e-3
-python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b6 --predict_path ./predict/image_baseline_efficientnet_b6 --tta
+# Image baseline + model densenet201 ->
+python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --accumulation_steps 1 --wandb --model_name_or_path densenet201 --output_path ./saved_model/image_baseline_densenet201 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --lr 1e-3
+python inference.py --device 1 --output_path_list ./saved_model/image_baseline_densenet201 --predict_path ./predict/image_baseline_densenet201 --tta
