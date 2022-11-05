@@ -25,6 +25,9 @@ if __name__ == '__main__':
             if fold > 1:
                 break
 
+        if fold == 1:
+            continue
+
         if args.wandb:
             name = f'{args.output_path.split("/")[-1]}_FOLD{args.fold}'
             wandb_config = {k: v for k, v in vars(args).items() if 'idx' not in k}
