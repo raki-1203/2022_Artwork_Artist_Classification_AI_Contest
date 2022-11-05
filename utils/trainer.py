@@ -309,6 +309,9 @@ class Trainer:
             elif 'resnet50' in self.args.saved_model_path:
                 self.args.model_name_or_path = 'resnet50'
                 model = ImageModel(self.args)
+            elif 'efficientnet_b3' in self.args.saved_model_path:
+                self.args.model_name_or_path = 'efficientnet_b3'
+                model = ImageModel(self.args)
             else:
                 raise NotImplementedError('좀 더 고민해봐....... 에러처리 더 해야 할 듯')
 
