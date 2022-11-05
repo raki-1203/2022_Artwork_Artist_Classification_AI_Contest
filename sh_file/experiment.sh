@@ -49,5 +49,5 @@
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_validation_randomcrop_resnext50_32x4d --predict_path ./predict/image_baseline_validation_randomcrop_resnext50_32x4d --tta
 
 # Image baseline + model densenet201 ->
-python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 32 --accumulation_steps 1 --wandb --model_name_or_path densenet201 --output_path ./saved_model/image_baseline_densenet201 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --lr 1e-3
+python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 16 --accumulation_steps 2 --wandb --model_name_or_path densenet201 --output_path ./saved_model/image_baseline_densenet201 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --lr 1e-3
 python inference.py --device 1 --output_path_list ./saved_model/image_baseline_densenet201 --predict_path ./predict/image_baseline_densenet201 --tta
