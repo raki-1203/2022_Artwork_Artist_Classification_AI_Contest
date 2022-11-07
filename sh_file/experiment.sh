@@ -52,6 +52,10 @@
 #python train.py --is_train --use_amp --device 0 --epochs 30 --train_batch_size 16 --accumulation_steps 2 --wandb --model_name_or_path efficientnet_b4 --output_path ./saved_model/image_baseline_efficientnet_b4 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 --predict_path ./predict/image_baseline_efficientnet_b4 --tta
 
-# Image baseline + model efficientnet_b4 Cross Validation ->
-python train.py --is_train --use_amp --device 0 --epochs 30 --train_batch_size 16 --accumulation_steps 2 --wandb --model_name_or_path efficientnet_b4 --output_path ./saved_model/image_baseline_efficientnet_b4 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --cv
-python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 --predict_path ./predict/image_baseline_efficientnet_b4_cv --tta
+# Image baseline + model efficientnet_b4 Cross Validation -> 0.84400
+#python train.py --is_train --use_amp --device 0 --epochs 30 --train_batch_size 16 --accumulation_steps 2 --wandb --model_name_or_path efficientnet_b4 --output_path ./saved_model/image_baseline_efficientnet_b4 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --cv
+#python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 --predict_path ./predict/image_baseline_efficientnet_b4_cv --tta
+
+# Image baseline + model resnext50_32x4d Cross Validation ->
+python train.py --is_train --use_amp --device 0 --epochs 30 --train_batch_size 32 --accumulation_steps 1 --wandb --model_name_or_path resnext50_32x4d --output_path ./saved_model/image_baseline_resnext50_32x4d --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --cv
+python inference.py --device 1 --output_path_list ./saved_model/image_baseline_resnext50_32x4d --predict_path ./predict/image_baseline_resnext50_32x4d_cv --tta
