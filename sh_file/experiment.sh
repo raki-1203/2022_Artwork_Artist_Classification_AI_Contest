@@ -60,5 +60,9 @@
 #python train.py --is_train --use_amp --device 0 --epochs 30 --train_batch_size 32 --accumulation_steps 1 --wandb --model_name_or_path resnext50_32x4d --output_path ./saved_model/image_baseline_resnext50_32x4d --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --cv
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_resnext50_32x4d --predict_path ./predict/image_baseline_resnext50_32x4d_cv --tta
 
-# Image baseline + model efficientnet_b4, resnext50_32x4d Ensemble Inference ->
-python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 ./saved_model/image_baseline_resnext50_32x4d --predict_path ./predict/image_baseline_ensemble_efficientnet_b4_resnext50_32x4d_cv --tta
+# Image baseline + model efficientnet_b4, resnext50_32x4d Ensemble Inference -> 0.860458
+#python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 ./saved_model/image_baseline_resnext50_32x4d --predict_path ./predict/image_baseline_ensemble_efficientnet_b4_resnext50_32x4d_cv --tta
+
+# Image baseline + model convnext_tiny_384_in22ft1k Cross Validation ->
+python train.py --is_train --use_amp --device 0 --epochs 30 --train_batch_size 32 --accumulation_steps 1 --wandb --model_name_or_path convnext_tiny_384_in22ft1k --output_path ./saved_model/image_baseline_convnext_tiny_384_in22ft1k --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --cv
+python inference.py --device 1 --output_path_list ./saved_model/image_baseline_convnext_tiny_384_in22ft1k --predict_path ./predict/image_baseline_convnext_tiny_384_in22ft1k_cv --tta
