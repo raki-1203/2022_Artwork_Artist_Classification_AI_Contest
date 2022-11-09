@@ -28,7 +28,7 @@ def main():
         logger.info('저장된 모델 없음....종료!')
         return
 
-    if args.ensemble:
+    if args.ensemble and os.path.exists('./predict/ensemble_output_probs.pkl'):
         output_probs = load_pickle('./predict/ensemble_output_probs.pkl')
     else:
         output_probs = np.zeros((df.shape[0], args.num_labels))
