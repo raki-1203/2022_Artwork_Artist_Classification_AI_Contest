@@ -25,7 +25,7 @@ if __name__ == '__main__':
             if fold > 1:
                 break
 
-        if fold == 1:
+        if fold <= 4:
             continue
 
         if args.wandb:

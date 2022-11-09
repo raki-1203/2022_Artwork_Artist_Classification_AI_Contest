@@ -42,6 +42,7 @@ class Arguments:
         self.add_argument('--img_size', type=int, default=384)
         self.add_argument('--num_labels', type=int, default=50)
         self.add_argument('--tta', action='store_true')
+        self.add_argument('--ensemble', action='store_true')
         self.add_argument('--beta', type=float, default=0)
         self.add_argument('--cutmix_prob', type=float, default=0)
 

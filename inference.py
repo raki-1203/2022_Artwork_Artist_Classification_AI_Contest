@@ -1,4 +1,5 @@
 import os
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -27,7 +28,10 @@ def main():
         logger.info('저장된 모델 없음....종료!')
         return
 
-    output_probs = np.zeros((df.shape[0], args.num_labels))
+    if args.ensemble:
+        output_probs = load_pickle('./predict/ensemble_output_probs.pkl')
+    else:
+        output_probs = np.zeros((df.shape[0], args.num_labels))
     for i, model_name in enumerate(model_list, start=1):
         args.saved_model_path = model_name
         logger.info(f'{i} 번째 predict 진행 중!')
@@ -48,6 +52,25 @@ def main():
     file_save_path = os.path.join(args.predict_path, f'submission_{args.predict_path.split("/")[-1]}')
     output_df.to_csv(f'{file_save_path}.csv', index=False)
     logger.info(f'File Save at {file_save_path}')
+
+    if args.ensemble:
+        output_probs_save_path = './predict/ensemble_output_probs.pkl'
+        save_pickle(output_probs_save_path, output_probs)
+    else:
+        output_probs_save_path = os.path.join(args.predict_path, 'output_probs.pkl')
+        save_pickle(output_probs_save_path, output_probs)
+    logger.info(f'File Save at {output_probs_save_path}')
+
+
+def load_pickle(path):
+    with open(path, 'rb') as f:
+        return pickle.load(f)
+
+def save_pickle(path, x):
+    with open(path, 'wb') as f:
+        pickle.dump(x, f)
+
+
 
 
 if __name__ == '__main__':
