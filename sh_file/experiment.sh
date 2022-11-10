@@ -68,8 +68,12 @@
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_convnext_tiny_384_in22ft1k --predict_path ./predict/image_baseline_convnext_tiny_384_in22ft1k_cv --tta
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 ./saved_model/image_baseline_resnext50_32x4d ./saved_model/image_baseline_convnext_tiny_384_in22ft1k --predict_path ./predict/image_baseline_ensemble_efficientnet_b4_resnext50_32x4d_convnext_tiny_384_in22ft1k_cv --tta --ensemble
 
-# Image baseline + cutout + model efficientnet_b4 Cross Validation -> 0.8242523,
+# Image baseline + cutout + model efficientnet_b4 Cross Validation -> 0.8242523, 0.869911
 #python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 16 --accumulation_steps 2 --wandb --model_name_or_path efficientnet_b4 --output_path ./saved_model/image_baseline_cutout_efficientnet_b4 --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --cv
 #python inference.py --device 1 --output_path_list ./saved_model/image_baseline_cutout_efficientnet_b4 --predict_path ./predict/image_baseline_cutout_efficientnet_b4_cv --tta
-python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 ./saved_model/image_baseline_resnext50_32x4d ./saved_model/image_baseline_convnext_tiny_384_in22ft1k ./saved_model/image_baseline_cutout_efficientnet_b4 --predict_path ./predict/image_baseline_ensemble_efficientnet_b4_resnext50_32x4d_convnext_tiny_384_in22ft1k_cutout_efficientnet_b4_cv --tta --ensemble
+#python inference.py --device 1 --output_path_list ./saved_model/image_baseline_efficientnet_b4 ./saved_model/image_baseline_resnext50_32x4d ./saved_model/image_baseline_convnext_tiny_384_in22ft1k ./saved_model/image_baseline_cutout_efficientnet_b4 --predict_path ./predict/image_baseline_ensemble_efficientnet_b4_resnext50_32x4d_convnext_tiny_384_in22ft1k_cutout_efficientnet_b4_cv --tta --ensemble
 
+# Image baseline + model res2net50_26w_4s Cross Validation ->
+python train.py --is_train --use_amp --device 1 --epochs 30 --train_batch_size 16 --accumulation_steps 2 --wandb --model_name_or_path res2net50_26w_4s --output_path ./saved_model/image_baseline_res2net50_26w_4s --loss WeightedCrossEntropy --beta 1 --cutmix_prob 0.5 --cv
+python inference.py --device 1 --output_path_list ./saved_model/image_baseline_res2net50_26w_4s --predict_path ./predict/image_baseline_res2net50_26w_4s --tta
+python inference.py --device 1 --output_path_list ./saved_model/image_baseline_res2net50_26w_4s ./saved_model/image_baseline_efficientnet_b4 ./saved_model/image_baseline_resnext50_32x4d ./saved_model/image_baseline_convnext_tiny_384_in22ft1k --predict_path ./predict/image_baseline_ensemble_efficientnet_b4_resnext50_32x4d_convnext_tiny_384_in22ft1k_res2net50_26w_4s --tta --ensemble
