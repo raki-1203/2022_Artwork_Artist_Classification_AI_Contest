@@ -315,6 +315,9 @@ class Trainer:
             elif 'convnext_tiny_384_in22ft1k' in self.args.saved_model_path:
                 self.args.model_name_or_path = 'convnext_tiny_384_in22ft1k'
                 model = ImageModel(self.args)
+            elif 'res2net50_26w_4s' in self.args.saved_model_path:
+                self.args.model_name_or_path = 'res2net50_26w_4s'
+                model = ImageModel(self.args)
             else:
                 raise NotImplementedError('좀 더 고민해봐....... 에러처리 더 해야 할 듯')
 
