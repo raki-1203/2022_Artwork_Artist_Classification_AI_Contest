@@ -25,8 +25,8 @@ if __name__ == '__main__':
             if fold > 1:
                 break
 
-        if fold <= 3:
-            continue
+        # if fold <= 3:
+        #     continue
 
         if args.wandb:
             name = f'{args.output_path.split("/")[-1]}_FOLD{args.fold}'
